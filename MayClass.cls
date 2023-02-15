@@ -14,6 +14,29 @@ Public Enum EnumByRowOrColumn
     ByRow
 End Enum
 
+Public Function ArrayStringJoin(columnData As Variant, delimiter As String)
+10        On Error GoTo ArrayStringJoin_Error
+          Dim res As Variant
+          Dim i As Long
+
+20        If ArrayRowsCount(columnData) <= 1 Then
+30            res = columnData
+40        Else
+50            For i = 1 To ArrayRowsCount(columnData)
+60                If i = ArrayRowsCount(columnData) Then
+70                    res = res & columnData(i, 1)
+80                Else
+90                    res = res & columnData(i, 1) & delimiter
+100               End If
+110           Next i
+120       End If
+          
+130       ArrayStringJoin = res
+140       Exit Function
+ArrayStringJoin_Error:
+150       ArrayStringJoin = "#ArrayStringJoin:line(" & CStr(Erl) & ")" & Err.Description & "!"
+
+End Function
 
 Public Function ArrayTrim(data As Variant)
 10        On Error GoTo ArrayTrim_Error
@@ -502,6 +525,21 @@ Public Function ArrayTranspose(data)
 110       Exit Function
 ArrayTranspose_Error:
 120       ArrayTranspose = "#ArrayTranspose:line(" & CStr(Erl) & ")" & Err.Description & "!"
+End Function
+
+Public Function ArrayContains(data As Variant, target As Variant)
+10        On Error GoTo ArrayContains_Error
+          Dim po As New MayClassPosition
+20        ArrayFindFirstPosition data, target, po
+30        If po.rowNum <> 0 Then
+40            ArrayContains = True
+50        Else
+60            ArrayContains = False
+70        End If
+80        Exit Function
+ArrayContains_Error:
+90        ArrayContains = "#ArrayContains:line(" & CStr(Erl) & ")" & Err.Description & "!"
+
 End Function
 
 Public Function ArrayFindFirstPosition(sourceArray As Variant, targetData As Variant, ByRef po As MayClassPosition, Optional byRowOrColumn As EnumByRowOrColumn = ByRow)
