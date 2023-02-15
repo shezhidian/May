@@ -1442,6 +1442,19 @@ getFolderListInFolderAndSub_Error:
 
 End Function
 
+Public Function CopyOnlyFormats(sourceRange As Range, targetRange As Range)
+10        On Error GoTo CopyOnlyFormats_Error
+          
+20        sourceRange.Copy
+30        targetRange.PasteSpecial Paste:=xlPasteFormats, Operation:=xlNone, SkipBlanks:=False, Transpose:=False
+40        Application.CutCopyMode = False
+          
+50        Exit Function
+CopyOnlyFormats_Error:
+60        CopyOnlyFormats = "#CopyOnlyFormats:line(" & CStr(Erl) & ")" & Err.Description & "!"
+
+End Function
+
 Public Function AboutMay()
 10    AboutMay = "Author: shezhidian@163.com"
 End Function
