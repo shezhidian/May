@@ -44,7 +44,7 @@ Sub testArrayColumnTake()
     
     Dim res As Variant
     
-    'selection is the data you prepared in step 1
+    'selection is the data you prepared at first
     
     data = Selection.Value
     
