@@ -13,6 +13,173 @@ Public Enum EnumByRowOrColumn
     ByColumn
     ByRow
 End Enum
+Public Function ArrayMin(data As Variant)
+10        On Error GoTo ArrayMin_Error
+          Dim res As Variant
+          Dim item As Variant
+20        res = Empty
+30        For Each item In data
+40            If IsNumeric(item) Then
+50                If res = Empty Then
+60                    res = item
+70                Else
+80                    If item < res Then
+90                        res = item
+100                   End If
+110               End If
+120           End If
+130       Next item
+          
+140       If res = Empty Then
+150           res = "#No number in array!"
+160       End If
+
+170       ArrayMin = res
+180       Exit Function
+ArrayMin_Error:
+190       ArrayMin = "#ArrayMin:line(" & CStr(Erl) & ")" & Err.Description & "!"
+
+End Function
+Public Function ArrayMax(data As Variant)
+10        On Error GoTo ArrayMax_Error
+          Dim res As Variant
+          Dim item As Variant
+20        res = Empty
+30        For Each item In data
+40            If IsNumeric(item) Then
+50                If res = Empty Then
+60                    res = item
+70                Else
+80                    If item > res Then
+90                        res = item
+100                   End If
+110               End If
+120           End If
+130       Next item
+          
+140       If res = Empty Then
+150           res = "#No number in array!"
+160       End If
+170       ArrayMax = res
+180       Exit Function
+ArrayMax_Error:
+190       ArrayMax = "#ArrayMax:line(" & CStr(Erl) & ")" & Err.Description & "!"
+
+End Function
+
+Public Function ArrayLCase(data As Variant)
+10        On Error GoTo ArrayLCase_Error
+          Dim i As Long
+          Dim j As Long
+
+20        For i = 1 To ArrayRowsCount(data)
+30            For j = 1 To ArrayColumnsCount(data)
+40                If TypeName(data(i, j)) = "String" Then
+50                    data(i, j) = LCase(data(i, j))
+60                End If
+70            Next j
+80        Next i
+
+90        ArrayLCase = data
+100       Exit Function
+ArrayLCase_Error:
+110       ArrayLCase = "#ArrayLCase:line(" & CStr(Erl) & ")" & Err.Description & "!"
+
+End Function
+
+Public Function ArrayUCase(data As Variant)
+10        On Error GoTo ArrayUCase_Error
+          Dim i As Long
+          Dim j As Long
+
+20        For i = 1 To ArrayRowsCount(data)
+30            For j = 1 To ArrayColumnsCount(data)
+40                If TypeName(data(i, j)) = "String" Then
+50                    data(i, j) = UCase(data(i, j))
+60                End If
+70            Next j
+80        Next i
+
+90        ArrayUCase = data
+          
+100       Exit Function
+ArrayUCase_Error:
+110       ArrayUCase = "#ArrayUCase:line(" & CStr(Erl) & ")" & Err.Description & "!"
+
+End Function
+
+Public Function ArrayInstr(columnData As Variant, StrToMatch As String)
+10        On Error GoTo ArrayInstr_Error
+          Dim res As Variant
+          Dim i As Long
+20        res = ArrayCreate(ArrayRowsCount(columnData), 1)
+30        For i = 1 To ArrayRowsCount(columnData)
+40            res(i, 1) = InStr(columnData(i, 1), StrToMatch)
+50        Next i
+          
+60        ArrayInstr = res
+70        Exit Function
+ArrayInstr_Error:
+80        ArrayInstr = "#ArrayInstr:line(" & CStr(Erl) & ")" & Err.Description & "!"
+
+End Function
+Public Function ArrayNot(data As Variant)
+10        On Error GoTo ArrayNot_Error
+          Dim i As Long
+          Dim j As Long
+          
+20        For i = 1 To ArrayRowsCount(data)
+30            For j = 1 To ArrayColumnsCount(data)
+40                If TypeName(data(i, j)) = "Boolean" Then
+50                    data(i, j) = Not data(i, j)
+60                End If
+70            Next j
+80        Next i
+
+90        ArrayNot = data
+100       Exit Function
+ArrayNot_Error:
+110       ArrayNot = "#ArrayNot:line(" & CStr(Erl) & ")" & Err.Description & "!"
+
+End Function
+
+Public Function ArrayColumnOr(columnData As Variant)
+10        On Error GoTo ArrayColumnOr_Error
+          Dim res As Variant
+          Dim i As Long
+20        res = False
+30        For i = 1 To ArrayRowsCount(columnData)
+40            If columnData(i, 1) = True Then
+50                res = True
+60                Exit For
+70            End If
+80        Next i
+          
+90        ArrayColumnOr = res
+100       Exit Function
+ArrayColumnOr_Error:
+110       ArrayColumnOr = "#ArrayColumnOr:line(" & CStr(Erl) & ")" & Err.Description & "!"
+
+End Function
+
+Public Function ArrayColumnAnd(columnData As Variant)
+10        On Error GoTo ArrayColumnAnd_Error
+          Dim res As Variant
+          Dim i As Long
+20        res = True
+30        For i = 1 To ArrayRowsCount(columnData)
+40            If columnData(i, 1) = False Then
+50                res = False
+60                Exit For
+70            End If
+80        Next i
+
+90        ArrayColumnAnd = res
+100       Exit Function
+ArrayColumnAnd_Error:
+110       ArrayColumnAnd = "#ArrayColumnAnd:line(" & CStr(Erl) & ")" & Err.Description & "!"
+
+End Function
 
 Public Function ArrayStringJoin(columnData As Variant, delimiter As String)
 10        On Error GoTo ArrayStringJoin_Error
@@ -127,15 +294,17 @@ Public Function ArrayIsEqualOrGreaterThan(columnData As Variant, target As Varia
 
 20        res = ArrayCreate(UBound(columnData, 1), 1, False)
 30        For i = 1 To UBound(columnData, 1)
-40            If columnData(i, 1) >= target Then
-50                res(i, 1) = True
-60            End If
-70        Next i
+40            If IsNumeric(columnData(i, 1)) Then
+50                If columnData(i, 1) >= target Then
+60                    res(i, 1) = True
+70                End If
+80            End If
+90        Next i
 
-80        ArrayIsEqualOrGreaterThan = res
-90        Exit Function
+100       ArrayIsEqualOrGreaterThan = res
+110       Exit Function
 ArrayIsEqualOrGreaterThan_Error:
-100       ArrayIsEqualOrGreaterThan = "#ArrayIsEqualOrGreaterThan:line(" & CStr(Erl) & ")" & Err.Description & "!"
+120       ArrayIsEqualOrGreaterThan = "#ArrayIsEqualOrGreaterThan:line(" & CStr(Erl) & ")" & Err.Description & "!"
 
 End Function
 
@@ -145,16 +314,19 @@ Public Function ArrayIsEqualOrLessThan(columnData As Variant, target As Variant)
           Dim i As Long
 
 20        res = ArrayCreate(UBound(columnData, 1), 1, False)
+          
 30        For i = 1 To UBound(columnData, 1)
-40            If columnData(i, 1) <= target Then
-50                res(i, 1) = True
-60            End If
-70        Next i
+40            If IsNumeric(columnData(i, 1)) Then
+50                If columnData(i, 1) <= target Then
+60                    res(i, 1) = True
+70                End If
+80            End If
+90        Next i
 
-80        ArrayIsEqualOrLessThan = res
-90        Exit Function
+100       ArrayIsEqualOrLessThan = res
+110       Exit Function
 ArrayIsEqualOrLessThan_Error:
-100       ArrayIsEqualOrLessThan = "#ArrayIsEqualOrLessThan:line(" & CStr(Erl) & ")" & Err.Description & "!"
+120       ArrayIsEqualOrLessThan = "#ArrayIsEqualOrLessThan:line(" & CStr(Erl) & ")" & Err.Description & "!"
 
 End Function
 
@@ -165,15 +337,17 @@ Public Function ArrayIsLessThan(columnData As Variant, target As Variant)
 
 20        res = ArrayCreate(UBound(columnData, 1), 1, False)
 30        For i = 1 To UBound(columnData, 1)
-40            If columnData(i, 1) < target Then
-50                res(i, 1) = True
-60            End If
-70        Next i
+40            If IsNumeric(columnData(i, 1)) Then
+50                If columnData(i, 1) < target Then
+60                    res(i, 1) = True
+70                End If
+80            End If
+90        Next i
 
-80        ArrayIsLessThan = res
-90        Exit Function
+100       ArrayIsLessThan = res
+110       Exit Function
 ArrayIsLessThan_Error:
-100       ArrayIsLessThan = "#ArrayIsLessThan:line(" & CStr(Erl) & ")" & Err.Description & "!"
+120       ArrayIsLessThan = "#ArrayIsLessThan:line(" & CStr(Erl) & ")" & Err.Description & "!"
 
 End Function
 
@@ -184,15 +358,17 @@ Public Function ArrayIsGreaterThan(columnData As Variant, target As Variant)
 
 20        res = ArrayCreate(UBound(columnData, 1), 1, False)
 30        For i = 1 To UBound(columnData, 1)
-40            If columnData(i, 1) > target Then
-50                res(i, 1) = True
-60            End If
-70        Next i
+40            If IsNumeric(columnData(i, 1)) Then
+50                If columnData(i, 1) > target Then
+60                    res(i, 1) = True
+70                End If
+80            End If
+90        Next i
 
-80        ArrayIsGreaterThan = res
-90        Exit Function
+100       ArrayIsGreaterThan = res
+110       Exit Function
 ArrayIsGreaterThan_Error:
-100       ArrayIsGreaterThan = "#ArrayIsGreaterThan:line(" & CStr(Erl) & ")" & Err.Description & "!"
+120       ArrayIsGreaterThan = "#ArrayIsGreaterThan:line(" & CStr(Erl) & ")" & Err.Description & "!"
 
 End Function
 
