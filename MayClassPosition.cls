@@ -8,5 +8,6 @@ Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
 Option Explicit
+'a value pair class for position
 Public rowNum As Long
 Public columnNum As Long
