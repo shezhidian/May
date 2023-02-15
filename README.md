@@ -8,8 +8,8 @@ Quick Start:
 
 Step1: Import MayClass.cls、MayClassPosition.cls into VBA project
 
- ![image](https://user-images.githubusercontent.com/69334389/218955859-57033dca-75d2-460e-8498-a39996015646.png)
 
+<img width="112" alt="image" src="https://user-images.githubusercontent.com/69334389/218962665-65dc3b37-8fa1-4d34-9bac-de51000928e1.png">
 
 
 Step2: Hello World!
