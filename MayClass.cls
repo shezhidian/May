@@ -13,6 +13,17 @@ Public Enum EnumByRowOrColumn
     ByColumn
     ByRow
 End Enum
+
+Public Enum EnumFromFirstOrLast
+    FromFirst
+    FromLast
+End Enum
+
+Public Enum EnumGetLeftOrRight
+    GetLeft
+    GetRight
+End Enum
+
 Public Function ArrayMin(data As Variant)
 10        On Error GoTo ArrayMin_Error
           Dim res As Variant
@@ -108,6 +119,36 @@ ArrayUCase_Error:
 
 End Function
 
+Public Function ArrayCStr(data As Variant, Optional IfAddStrPrefix As Boolean = False, Optional IfOnlyAddStrPrefixForNumbers As Boolean = True)
+10        On Error GoTo ArrayCStr_Error
+          Dim i As Long
+          Dim j As Long
+
+20        For i = 1 To ArrayRowsCount(data)
+30            For j = 1 To ArrayColumnsCount(data)
+40                If TypeName(data(i, j)) <> "String" Then
+50                    If IfAddStrPrefix = True Then
+60                        If IfOnlyAddStrPrefixForNumbers = True Then
+70                            If IsNumeric(data(i, j)) Then
+80                                data(i, j) = "'" & CStr(data(i, j))
+90                            End If
+100                       Else
+110                           data(i, j) = "'" & CStr(data(i, j))
+120                       End If
+130                   Else
+140                       data(i, j) = CStr(data(i, j))
+150                   End If
+160               End If
+170           Next j
+180       Next i
+          
+190       ArrayCStr = data
+200       Exit Function
+ArrayCStr_Error:
+210       ArrayCStr = "#ArrayCStr:line(" & CStr(Erl) & ")" & Err.Description & "!"
+
+End Function
+
 Public Function ArrayInstr(columnData As Variant, StrToMatch As String)
 10        On Error GoTo ArrayInstr_Error
           Dim res As Variant
@@ -123,6 +164,28 @@ ArrayInstr_Error:
 80        ArrayInstr = "#ArrayInstr:line(" & CStr(Erl) & ")" & Err.Description & "!"
 
 End Function
+
+Public Function ArrayReplace(data As Variant, valueToMatch As Variant, valueToSet As Variant)
+10        On Error GoTo ArrayReplace_Error
+          Dim i As Long
+          Dim j As Long
+          
+20        For i = 1 To ArrayRowsCount(data)
+30            For j = 1 To ArrayColumnsCount(data)
+40                If data(i, j) = valueToMatch Then
+50                    data(i, j) = valueToSet
+60                End If
+70            Next j
+80        Next i
+
+90        ArrayReplace = data
+100       Exit Function
+ArrayReplace_Error:
+110       ArrayReplace = "#ArrayReplace:line(" & CStr(Erl) & ")" & Err.Description & "!"
+
+
+End Function
+
 Public Function ArrayNot(data As Variant)
 10        On Error GoTo ArrayNot_Error
           Dim i As Long
@@ -252,6 +315,41 @@ Public Function ArrayVLookup(sourceArray As Variant, targetColumnData As Variant
 150       Exit Function
 ArrayVLookup_Error:
 160       ArrayVLookup = "#ArrayVLookup:line(" & CStr(Erl) & ")" & Err.Description & "!"
+
+End Function
+
+Public Function ArrayStringBetweenString(data As Variant, delimiter As String, firstOrLast As EnumFromFirstOrLast, leftOrRight As EnumGetLeftOrRight)
+10        On Error GoTo ArrayStringBetweenString_Error
+          Dim i As Long
+          Dim j As Long
+          Dim num As Long
+          Dim item As Variant
+20        For i = 1 To ArrayRowsCount(data)
+30            For j = 1 To ArrayColumnsCount(data)
+40                item = data(i, j)
+50                If TypeName(item) = "String" Then
+60                    num = InStr(item, delimiter)
+70                    If num > 0 Then
+80                        If firstOrLast = FromLast Then
+90                            num = InStrRev(item, delimiter)
+100                       End If
+                          
+110                       If leftOrRight = GetLeft Then
+120                           data(i, j) = Left(item, num - 1)
+130                       Else
+140                           data(i, j) = Right(item, Len(item) - num)
+150                       End If
+                          
+160                   End If
+170               End If
+180           Next j
+190       Next i
+          
+          
+200       ArrayStringBetweenString = data
+210       Exit Function
+ArrayStringBetweenString_Error:
+220       ArrayStringBetweenString = "#ArrayStringBetweenString:line(" & CStr(Erl) & ")" & Err.Description & "!"
 
 End Function
 
