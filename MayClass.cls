@@ -9,6 +9,12 @@ Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
 Option Explicit
 
+Public Enum EnumByRowOrColumn
+    ByColumn
+    ByRow
+End Enum
+
+
 Public Function ArrayTrim(data As Variant)
 10        On Error GoTo ArrayTrim_Error
           Dim i As Long
@@ -43,7 +49,7 @@ Public Function ArrayVLookup(sourceArray As Variant, targetColumnData As Variant
 40        For i = 1 To UBound(sourceColumnDataToSearch)
 50            po.columnNum = 0
 60            po.rowNum = 0
-70            ArrayFindFirstPosition targetColumnData, sourceColumnDataToSearch(i, 1), po, True
+70            ArrayFindFirstPosition targetColumnData, sourceColumnDataToSearch(i, 1), po, ByColumn
 80            If po.columnNum > 0 Or po.rowNum > 0 Then
 90                chooser(i, 1) = True
 100           End If
@@ -498,14 +504,14 @@ ArrayTranspose_Error:
 120       ArrayTranspose = "#ArrayTranspose:line(" & CStr(Erl) & ")" & Err.Description & "!"
 End Function
 
-Public Function ArrayFindFirstPosition(sourceArray As Variant, targetData As Variant, ByRef po As MayClassPosition, Optional ByColumn As Boolean = False)
+Public Function ArrayFindFirstPosition(sourceArray As Variant, targetData As Variant, ByRef po As MayClassPosition, Optional byRowOrColumn As EnumByRowOrColumn = ByRow)
 
 10        On Error GoTo ArrayFindFirstPosition_Error
           Dim i As Long
           Dim j As Long
 20        po.rowNum = 0
 30        po.columnNum = 0
-40        If ByColumn = False Then
+40        If byRowOrColumn = ByRow Then
 50            For i = 1 To UBound(sourceArray, 1)
 60                For j = 1 To UBound(sourceArray, 2)
 70                    If sourceArray(i, j) = targetData Then
@@ -809,6 +815,41 @@ ArrayCreate_end:
 150       Exit Function
 ArrayCreate_Error:
 160       ArrayCreate = "#ArrayCreate:line(" & CStr(Erl) & ")" & Err.Description & "!"
+End Function
+
+Public Function ArrayNumberCreate(rowCount As Long, columnCount As Long, Optional startNum As Long = 1, Optional step As Long = 1, Optional byRowOrColumn As EnumByRowOrColumn = ByColumn)
+
+10        On Error GoTo ArrayNumberCreate_Error
+          Dim res() As Variant
+          Dim currentNum As Long
+          Dim i As Long
+          Dim j As Long
+20        If rowCount = 0 Or columnCount = 0 Then
+30            ReDim res(0, 0)
+40            GoTo ArrayNumberCreate_end
+50        End If
+60        ReDim res(1 To rowCount, 1 To columnCount)
+70        currentNum = startNum
+80        If byRowOrColumn = ByRow Then
+90            For i = 1 To rowCount
+100               For j = 1 To columnCount
+110                   res(i, j) = currentNum
+120                   currentNum = currentNum + step
+130               Next j
+140           Next i
+150       Else
+160           For i = 1 To columnCount
+170               For j = 1 To rowCount
+180                   res(j, i) = currentNum
+190                   currentNum = currentNum + step
+200               Next j
+210           Next i
+220       End If
+ArrayNumberCreate_end:
+230       ArrayNumberCreate = res
+240       Exit Function
+ArrayNumberCreate_Error:
+250       ArrayNumberCreate = "#ArrayNumberCreate:line(" & CStr(Erl) & ")" & Err.Description & "!"
 End Function
 
 Public Function IsErrorString(data As Variant)
