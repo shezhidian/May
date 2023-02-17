@@ -24,14 +24,195 @@ Public Enum EnumGetLeftOrRight
     GetRight
 End Enum
 
+Public Function countChar(str_input As String, targetChar As String)
+10        On Error GoTo countChar_Error
+          Dim res As Variant
+          Dim i As Long
+          Dim j As Long
+20        res = 0
+30        For i = 1 To Len(str_input)
+40           If Mid(str_input, i, 1) = targetChar Then
+50            res = res + 1
+60           End If
+70        Next i
+          
+80        countChar = res
+90        Exit Function
+countChar_Error:
+100       countChar = "#countChar:line(" & CStr(Erl) & ")" & Err.Description & "!"
+
+End Function
+
+Public Function CompareTwoArrays(data1 As Variant, data2 As Variant)
+10        On Error GoTo CompareTwoArrays_Error
+          Dim res As Variant
+          Dim res_title As Variant
+          Dim item As Variant
+          Dim num_InBoth As Long
+          Dim num_In1 As Long
+          Dim num_In2 As Long
+          Dim max_num As Long
+          Dim itemCountData1 As Long
+          Dim itemCountData2 As Long
+          Dim po As New MayClassPosition
+          
+20        If IsEmpty(data1) Or IsEmpty(data2) Then
+30            res = "#data1 or data1 is empty!"
+40            GoTo CompareTwoArrays_end
+50        End If
+          
+60        res_title = ArrayTranspose(To2DArray(Array("InBoth", "In1NotIn2", "In2NotIn1")))
+70        num_InBoth = 0
+80        num_In1 = 0
+90        num_In2 = 0
+          
+          
+100       itemCountData1 = ArrayRowsCount(data1) * ArrayColumnsCount(data1)
+110       itemCountData2 = ArrayRowsCount(data2) * ArrayColumnsCount(data2)
+120       If itemCountData1 >= itemCountData2 Then
+130           res = ArrayCreate(itemCountData1, 3)
+140       Else
+150           res = ArrayCreate(itemCountData2, 3)
+160       End If
+          
+170       For Each item In data1
+180           ArrayFindFirstPosition data2, item, po, ByColumn
+190           If po.columnNum > 0 Or po.rowNum > 0 Then
+200               num_InBoth = num_InBoth + 1
+210               res(num_InBoth, 1) = item
+220           Else
+230               num_In1 = num_In1 + 1
+240               res(num_In1, 2) = item
+250           End If
+260       Next item
+          
+270       For Each item In data2
+280           ArrayFindFirstPosition data1, item, po, ByColumn
+290           If po.columnNum = 0 And po.rowNum = 0 Then
+300               num_In2 = num_In2 + 1
+310               res(num_In2, 3) = item
+320           End If
+330       Next item
+          
+          
+340       If num_In1 = 0 And num_In2 = 0 And num_InBoth = 0 Then
+350           res = "#no data in two arrays!"
+360           GoTo CompareTwoArrays_end
+370       End If
+          
+380       max_num = ArrayMax(To2DArray(Array(num_In1, num_In2, num_InBoth)))
+390       res = SubArray(res, 1, 1, max_num)
+400       res = ArrayStack(res_title, res)
+          
+CompareTwoArrays_end:
+410       CompareTwoArrays = res
+420       Exit Function
+CompareTwoArrays_Error:
+430       CompareTwoArrays = "#CompareTwoArrays:line(" & CStr(Erl) & ")" & Err.Description & "!"
+
+End Function
+
+Public Function getOneLable(twoColumnData As Variant, label As Variant)
+10        On Error GoTo getOneLable_Error
+          Dim res As Variant
+          Dim i As Long
+
+20        res = Empty
+30        For i = 1 To ArrayRowsCount(twoColumnData)
+40            If twoColumnData(i, 1) = label Then
+50                res = twoColumnData(i, 2)
+60                Exit For
+70            End If
+80        Next i
+          
+90        If IsEmpty(res) Then
+100           res = "#can't find label:" & label & "!"
+110       End If
+          
+120       getOneLable = res
+130       Exit Function
+getOneLable_Error:
+140       getOneLable = "#getOneLable:line(" & CStr(Erl) & ")" & Err.Description & "!"
+
+End Function
+
+
+Public Function ArrayRowAnd(chooser1 As Variant, chooser2 As Variant)
+10        On Error GoTo ArrayRowAnd_Error
+          Dim res As Variant
+          Dim i As Long
+          Dim j As Long
+
+20        If ArrayRowsCount(chooser1) <> ArrayRowsCount(chooser2) Then
+30            res = "#diffrent rows count for chooser1 and chooser2!"
+40        Else
+50            res = ArrayCreate(ArrayRowsCount(chooser1), 1, False)
+60            For i = 1 To ArrayRowsCount(chooser1)
+70                If chooser1(i, 1) = True And chooser2(i, 1) = True Then
+80                    res(i, 1) = True
+90                End If
+100           Next i
+110       End If
+          
+120       ArrayRowAnd = res
+130       Exit Function
+ArrayRowAnd_Error:
+140       ArrayRowAnd = "#ArrayRowAnd:line(" & CStr(Erl) & ")" & Err.Description & "!"
+
+End Function
+
+Public Function ArrayRowOr(chooser1 As Variant, chooser2 As Variant)
+10        On Error GoTo ArrayRowOr_Error
+          Dim res As Variant
+          Dim i As Long
+          Dim j As Long
+          
+20        If ArrayRowsCount(chooser1) <> ArrayRowsCount(chooser2) Then
+30            res = "#diffrent rows count for chooser1 and chooser2!"
+40        Else
+50            res = ArrayCreate(ArrayRowsCount(chooser1), 1, False)
+60            For i = 1 To ArrayRowsCount(chooser1)
+70                If chooser1(i, 1) = True Or chooser2(i, 1) = True Then
+80                    res(i, 1) = True
+90                End If
+100           Next i
+110       End If
+          
+120       ArrayRowOr = res
+130       Exit Function
+ArrayRowOr_Error:
+140       ArrayRowOr = "#ArrayRowOr:line(" & CStr(Erl) & ")" & Err.Description & "!"
+
+End Function
+
+Public Function ArrayRound(data As Variant, decimalNum As Long)
+10        On Error GoTo ArrayRound_Error
+          Dim i As Long
+          Dim j As Long
+
+20        For i = 1 To ArrayRowsCount(data)
+30            For j = 1 To ArrayColumnsCount(data)
+40                If IsNumeric(data(i, j)) And Not IsEmpty(item) Then
+50                    data(i, j) = Round(data(i, j), decimalNum)
+60                End If
+70            Next j
+80        Next i
+          
+90        ArrayRound = data
+100       Exit Function
+ArrayRound_Error:
+110       ArrayRound = "#ArrayRound:line(" & CStr(Erl) & ")" & Err.Description & "!"
+
+End Function
+
 Public Function ArrayMin(data As Variant)
 10        On Error GoTo ArrayMin_Error
           Dim res As Variant
           Dim item As Variant
 20        res = Empty
 30        For Each item In data
-40            If IsNumeric(item) Then
-50                If res = Empty Then
+40            If IsNumeric(item) And Not IsEmpty(item) Then
+50                If IsEmpty(res) Then
 60                    res = item
 70                Else
 80                    If item < res Then
@@ -41,7 +222,7 @@ Public Function ArrayMin(data As Variant)
 120           End If
 130       Next item
           
-140       If res = Empty Then
+140       If IsEmpty(res) Then
 150           res = "#No number in array!"
 160       End If
 
@@ -51,14 +232,74 @@ ArrayMin_Error:
 190       ArrayMin = "#ArrayMin:line(" & CStr(Erl) & ")" & Err.Description & "!"
 
 End Function
+
+Public Function ArrayAvg(data As Variant, Optional IfOnlyCountNumericCells As Boolean = True)
+10        On Error GoTo ArrayAvg_Error
+          Dim res As Variant
+          Dim i As Long
+          Dim item As Variant
+20        res = Empty
+30        i = 0
+40        For Each item In data
+50            If IsNumeric(item) And Not IsEmpty(item) Then
+60                i = i + 1
+70                If IsEmpty(res) Then
+80                    res = item
+90                Else
+100                   res = res + item
+110               End If
+120           ElseIf IfOnlyCountNumericCells = False Then
+130               i = i + 1
+140           End If
+150       Next item
+          
+160       If IsEmpty(res) Then
+170           res = "#No number in array!"
+180       Else
+190           res = res / i
+200       End If
+          
+210       ArrayAvg = res
+220       Exit Function
+ArrayAvg_Error:
+230       ArrayAvg = "#ArrayAvg:line(" & CStr(Erl) & ")" & Err.Description & "!"
+
+End Function
+
+Public Function ArraySum(data As Variant)
+10        On Error GoTo ArraySum_Error
+          Dim res As Variant
+          Dim item As Variant
+20        res = Empty
+30        For Each item In data
+40            If IsNumeric(item) And Not IsEmpty(item) Then
+50                If IsEmpty(res) Then
+60                    res = item
+70                Else
+80                    res = res + item
+90                End If
+100           End If
+110       Next item
+          
+120       If IsEmpty(res) Then
+130           res = "#No number in array!"
+140       End If
+          
+150       ArraySum = res
+160       Exit Function
+ArraySum_Error:
+170       ArraySum = "#ArraySum:line(" & CStr(Erl) & ")" & Err.Description & "!"
+
+End Function
+
 Public Function ArrayMax(data As Variant)
 10        On Error GoTo ArrayMax_Error
           Dim res As Variant
           Dim item As Variant
 20        res = Empty
 30        For Each item In data
-40            If IsNumeric(item) Then
-50                If res = Empty Then
+40            If IsNumeric(item) And Not IsEmpty(item) Then
+50                If IsEmpty(res) Then
 60                    res = item
 70                Else
 80                    If item > res Then
@@ -68,7 +309,7 @@ Public Function ArrayMax(data As Variant)
 120           End If
 130       Next item
           
-140       If res = Empty Then
+140       If IsEmpty(res) Then
 150           res = "#No number in array!"
 160       End If
 170       ArrayMax = res
@@ -126,7 +367,7 @@ Public Function ArrayCStr(data As Variant, Optional IfAddStrPrefix As Boolean = 
 
 20        For i = 1 To ArrayRowsCount(data)
 30            For j = 1 To ArrayColumnsCount(data)
-40                If TypeName(data(i, j)) <> "String" Then
+40                If TypeName(data(i, j)) <> "String" And Not IsEmpty(data(i, j)) Then
 50                    If IfAddStrPrefix = True Then
 60                        If IfOnlyAddStrPrefixForNumbers = True Then
 70                            If IsNumeric(data(i, j)) Then
@@ -274,7 +515,7 @@ Public Function ArrayTrim(data As Variant)
           Dim j As Long
 20        For i = 1 To UBound(data, 1)
 30            For j = 1 To UBound(data, 2)
-40                If TypeName(data(i, j)) = "String" Then
+40                If TypeName(data(i, j)) = "String" And Not IsEmpty(data(i, j)) Then
 50                    data(i, j) = Trim(data(i, j))
 60                End If
 70            Next j
@@ -287,7 +528,7 @@ ArrayTrim_Error:
 
 End Function
 
-Public Function ArrayVLookup(sourceArray As Variant, targetColumnData As Variant, columnToSearch As Long, columnsToTake As Variant)
+Public Function ArrayVLookup(sourceArray As Variant, targetColumnData As Variant, columnToSearch As Long, columnsToTake As Variant, Optional IfIncludeTitle As Boolean = False)
 10        On Error GoTo ArrayVLookup_Error
           Dim res As Variant
           Dim resCount As Variant
@@ -297,7 +538,7 @@ Public Function ArrayVLookup(sourceArray As Variant, targetColumnData As Variant
           Dim po As New MayClassPosition
 
           
-20        sourceColumnDataToSearch = ArrayColumnTakeByNum(sourceArray, columnToSearch, False)
+20        sourceColumnDataToSearch = ArrayColumnTakeByNum(sourceArray, columnToSearch, IfIncludeTitle)
 30        chooser = ArrayCreate(UBound(sourceColumnDataToSearch, 1), 1, False)
 40        For i = 1 To UBound(sourceColumnDataToSearch)
 50            po.columnNum = 0
@@ -392,7 +633,7 @@ Public Function ArrayIsEqualOrGreaterThan(columnData As Variant, target As Varia
 
 20        res = ArrayCreate(UBound(columnData, 1), 1, False)
 30        For i = 1 To UBound(columnData, 1)
-40            If IsNumeric(columnData(i, 1)) Then
+40            If IsNumeric(columnData(i, 1)) And Not IsEmpty(columnData(i, 1)) Then
 50                If columnData(i, 1) >= target Then
 60                    res(i, 1) = True
 70                End If
@@ -414,7 +655,7 @@ Public Function ArrayIsEqualOrLessThan(columnData As Variant, target As Variant)
 20        res = ArrayCreate(UBound(columnData, 1), 1, False)
           
 30        For i = 1 To UBound(columnData, 1)
-40            If IsNumeric(columnData(i, 1)) Then
+40            If IsNumeric(columnData(i, 1)) And Not IsEmpty(columnData(i, 1)) Then
 50                If columnData(i, 1) <= target Then
 60                    res(i, 1) = True
 70                End If
@@ -435,7 +676,7 @@ Public Function ArrayIsLessThan(columnData As Variant, target As Variant)
 
 20        res = ArrayCreate(UBound(columnData, 1), 1, False)
 30        For i = 1 To UBound(columnData, 1)
-40            If IsNumeric(columnData(i, 1)) Then
+40            If IsNumeric(columnData(i, 1)) And Not IsEmpty(columnData(i, 1)) Then
 50                If columnData(i, 1) < target Then
 60                    res(i, 1) = True
 70                End If
@@ -456,7 +697,7 @@ Public Function ArrayIsGreaterThan(columnData As Variant, target As Variant)
 
 20        res = ArrayCreate(UBound(columnData, 1), 1, False)
 30        For i = 1 To UBound(columnData, 1)
-40            If IsNumeric(columnData(i, 1)) Then
+40            If IsNumeric(columnData(i, 1)) And Not IsEmpty(columnData(i, 1)) Then
 50                If columnData(i, 1) > target Then
 60                    res(i, 1) = True
 70                End If
@@ -588,9 +829,9 @@ Public Function ArrayDimension(data As Variant)
 
 10        On Error GoTo ArrayDimension_Error
           Dim res As Variant
-20        If IsErrorString(ArrayDimension_1(data)) Then
+20        If isErrorString(ArrayDimension_1(data)) Then
 30            ArrayDimension = 0
-40        ElseIf IsErrorString(ArrayDimension_2(data)) Then
+40        ElseIf isErrorString(ArrayDimension_2(data)) Then
 50            ArrayDimension = 1
 60        Else
 70            ArrayDimension = 2
@@ -926,38 +1167,6 @@ ArrayColumnTakeByNum_Error:
 110       ArrayColumnTakeByNum = "#ArrayColumnTakeByNum:line(" & CStr(Erl) & ")" & Err.Description & "!"
 End Function
 
-'Public Function ArrayStack(sourceData As Variant, data1 As Variant, Optional data2 As Variant = Empty, Optional data3 As Variant = Empty, Optional data4 As Variant = Empty, Optional data5 As Variant, Optional data6 As Variant = Empty, Optional data7 As Variant = Empty, Optional data8 As Variant = Empty)
-'
-'10        On Error GoTo ArrayStack_Error
-'          Dim res As Variant
-'20        res = ArrayStack_(sourceData, data1)
-'30        If Not IsEmpty(data2) Then
-'40            res = ArrayStack_(res, data2)
-'50        End If
-'60        If Not IsEmpty(data3) Then
-'70            res = ArrayStack_(res, data3)
-'80        End If
-'90        If Not IsEmpty(data4) Then
-'100           res = ArrayStack_(res, data4)
-'110       End If
-'120       If Not IsEmpty(data5) Then
-'130           res = ArrayStack_(res, data5)
-'140       End If
-'150       If Not IsEmpty(data6) Then
-'160           res = ArrayStack_(res, data6)
-'170       End If
-'180       If Not IsEmpty(data7) Then
-'190           res = ArrayStack_(res, data7)
-'200       End If
-'210       If Not IsEmpty(data8) Then
-'220           res = ArrayStack_(res, data8)
-'230       End If
-'
-'240       ArrayStack = res
-'250       Exit Function
-'ArrayStack_Error:
-'260       ArrayStack = "#ArrayStack:line(" & CStr(Erl) & ")" & Err.Description & "!"
-'End Function
 Public Function ArrayStack(sourceData As Variant, targetData As Variant)
 
 10        On Error GoTo ArrayStack_Error
@@ -1164,16 +1373,51 @@ ArrayNumberCreate_Error:
 250       ArrayNumberCreate = "#ArrayNumberCreate:line(" & CStr(Erl) & ")" & Err.Description & "!"
 End Function
 
-Public Function IsErrorString(data As Variant)
+Public Function isErrorString(data As Variant)
 10    On Error Resume Next
-20    IsErrorString = False
+20    isErrorString = False
 30    If TypeName(data) = "String" Then
 40        If InStr(data, "#") = 1 And InStr(data, "!") = Len(data) Then
-50            IsErrorString = True
+50            isErrorString = True
 60        End If
 70    End If
 End Function
 
+Public Function isEmptyOrEmptyString(data As Variant)
+10        On Error GoTo IsEmptyOrEmptyString_Error
+          Dim res As Variant
+20        res = False
+30        If IsEmpty(data) Then
+40            res = True
+50        ElseIf TypeName(data) = "String" Then
+60            If Len(data) = 0 Then
+70                res = True
+80            End If
+90        End If
+          
+100       isEmptyOrEmptyString = res
+110       Exit Function
+IsEmptyOrEmptyString_Error:
+120       isEmptyOrEmptyString = "#IsEmptyOrEmptyString:line(" & CStr(Erl) & ")" & Err.Description & "!"
+
+End Function
+
+Public Function isEmptyOrErrorString(data As Variant)
+10        On Error GoTo isEmptyOrErrorString_Error
+          Dim res As Variant
+          
+20        If isEmptyOrEmptyString(data) Or isErrorString(data) Then
+30            res = True
+40        Else
+50            res = False
+60        End If
+          
+70        isEmptyOrErrorString = res
+80        Exit Function
+isEmptyOrErrorString_Error:
+90        isEmptyOrErrorString = "#isEmptyOrErrorString:line(" & CStr(Erl) & ")" & Err.Description & "!"
+
+End Function
 
 Public Function ShowData(data As Variant)
 
