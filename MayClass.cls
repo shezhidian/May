@@ -23,6 +23,30 @@ Public Enum EnumGetLeftOrRight
     GetLeft
     GetRight
 End Enum
+Public Function ArraySortBy(sourceData As Variant, columnData1 As Variant, rule1 As Variant, Optional columnData2 As Variant = Empty, Optional rule2 As Variant = Empty, Optional columnData3 As Variant = Empty, Optional rule3 As Variant = Empty, Optional columnData4 As Variant = Empty, Optional rule4 As Variant = Empty, Optional columnData5 As Variant = Empty, Optional rule5 As Variant = Empty, Optional columnData6 As Variant = Empty, Optional rule6 As Variant = Empty)
+10        On Error GoTo ArraySortBy_Error
+          Dim res As Variant
+20        If IsEmpty(columnData2) Or IsEmpty(rule2) Then
+30            res = WorksheetFunction.SortBy(sourceData, columnData1, rule1)
+40        ElseIf IsEmpty(columnData3) Or IsEmpty(rule3) Then
+50            res = WorksheetFunction.SortBy(sourceData, columnData1, rule1, columnData2, rule2)
+60        ElseIf IsEmpty(columnData4) Or IsEmpty(rule4) Then
+70            res = WorksheetFunction.SortBy(sourceData, columnData1, rule1, columnData2, rule2, columnData3, rule3)
+80        ElseIf IsEmpty(columnData5) Or IsEmpty(rule5) Then
+90            res = WorksheetFunction.SortBy(sourceData, columnData1, rule1, columnData2, rule2, columnData3, rule3, columnData4, rule4)
+100       ElseIf IsEmpty(columnData6) Or IsEmpty(rule6) Then
+110           res = WorksheetFunction.SortBy(sourceData, columnData1, rule1, columnData2, rule2, columnData3, rule3, columnData4, rule4, columnData5, rule5)
+120       Else
+130           res = WorksheetFunction.SortBy(sourceData, columnData1, rule1, columnData2, rule2, columnData3, rule3, columnData4, rule4, columnData5, rule5, columnData6, rule6)
+140       End If
+          
+150       ArraySortBy = res
+160       Exit Function
+ArraySortBy_Error:
+170       ArraySortBy = "#ArraySortBy:line(" & CStr(Erl) & ")" & Err.Description & "!"
+
+End Function
+
 
 Public Function countChar(str_input As String, targetChar As String)
 10        On Error GoTo countChar_Error
@@ -192,7 +216,7 @@ Public Function ArrayRound(data As Variant, decimalNum As Long)
 
 20        For i = 1 To ArrayRowsCount(data)
 30            For j = 1 To ArrayColumnsCount(data)
-40                If IsNumeric(data(i, j)) And Not IsEmpty(item) Then
+40                If IsNumeric(data(i, j)) And Not IsEmpty(data(i, j)) Then
 50                    data(i, j) = Round(data(i, j), decimalNum)
 60                End If
 70            Next j
