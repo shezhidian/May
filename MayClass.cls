@@ -48,7 +48,7 @@ ArraySortBy_Error:
 End Function
 
 
-Public Function countChar(str_input As String, targetChar As String)
+Public Function CountChar(str_input As String, targetChar As String)
 10        On Error GoTo countChar_Error
           Dim res As Variant
           Dim i As Long
@@ -60,10 +60,10 @@ Public Function countChar(str_input As String, targetChar As String)
 60           End If
 70        Next i
           
-80        countChar = res
+80        CountChar = res
 90        Exit Function
 countChar_Error:
-100       countChar = "#countChar:line(" & CStr(Erl) & ")" & Err.Description & "!"
+100       CountChar = "#countChar:line(" & CStr(Erl) & ")" & Err.Description & "!"
 
 End Function
 
@@ -81,7 +81,7 @@ Public Function CompareTwoArrays(data1 As Variant, data2 As Variant)
           Dim po As New MayClassPosition
           
 20        If IsEmpty(data1) Or IsEmpty(data2) Then
-30            res = "#data1 or data1 is empty!"
+30            res = "#data1 or data2 is empty!"
 40            GoTo CompareTwoArrays_end
 50        End If
           
@@ -136,7 +136,7 @@ CompareTwoArrays_Error:
 
 End Function
 
-Public Function getOneLable(twoColumnData As Variant, label As Variant)
+Public Function GetOneLable(twoColumnData As Variant, label As Variant)
 10        On Error GoTo getOneLable_Error
           Dim res As Variant
           Dim i As Long
@@ -153,10 +153,10 @@ Public Function getOneLable(twoColumnData As Variant, label As Variant)
 100           res = "#can't find label:" & label & "!"
 110       End If
           
-120       getOneLable = res
+120       GetOneLable = res
 130       Exit Function
 getOneLable_Error:
-140       getOneLable = "#getOneLable:line(" & CStr(Erl) & ")" & Err.Description & "!"
+140       GetOneLable = "#getOneLable:line(" & CStr(Erl) & ")" & Err.Description & "!"
 
 End Function
 
@@ -552,7 +552,7 @@ ArrayTrim_Error:
 
 End Function
 
-Public Function ArrayVLookup(sourceArray As Variant, targetColumnData As Variant, columnToSearch As Long, columnsToTake As Variant, Optional IfIncludeTitle As Boolean = False)
+Public Function ArrayVLookup(sourceArray As Variant, targetColumnData As Variant, columnToSearch As Long, Optional columnsToTake As Variant = Empty, Optional IfIncludeTitle As Boolean = False)
 10        On Error GoTo ArrayVLookup_Error
           Dim res As Variant
           Dim resCount As Variant
@@ -563,8 +563,8 @@ Public Function ArrayVLookup(sourceArray As Variant, targetColumnData As Variant
 
           
 20        sourceColumnDataToSearch = ArrayColumnTakeByNum(sourceArray, columnToSearch, IfIncludeTitle)
-30        chooser = ArrayCreate(UBound(sourceColumnDataToSearch, 1), 1, False)
-40        For i = 1 To UBound(sourceColumnDataToSearch)
+30        chooser = ArrayCreate(ArrayRowsCount(sourceColumnDataToSearch), 1, False)
+40        For i = 1 To ArrayRowsCount(sourceColumnDataToSearch)
 50            po.columnNum = 0
 60            po.rowNum = 0
 70            ArrayFindFirstPosition targetColumnData, sourceColumnDataToSearch(i, 1), po, ByColumn
@@ -574,12 +574,14 @@ Public Function ArrayVLookup(sourceArray As Variant, targetColumnData As Variant
 110       Next i
           
 120       res = ArrayChooseTrue(SubArray(sourceArray, 2, 1), chooser)
-130       res = ArrayColumnTakeByNums(res, columnsToTake, True)
+130       If Not IsEmpty(columnsToTake) Then
+140         res = ArrayColumnTakeByNums(res, columnsToTake, True)
+150       End If
 
-140       ArrayVLookup = res
-150       Exit Function
+160       ArrayVLookup = res
+170       Exit Function
 ArrayVLookup_Error:
-160       ArrayVLookup = "#ArrayVLookup:line(" & CStr(Erl) & ")" & Err.Description & "!"
+180       ArrayVLookup = "#ArrayVLookup:line(" & CStr(Erl) & ")" & Err.Description & "!"
 
 End Function
 
@@ -636,8 +638,8 @@ Public Function ArrayEqual(columnData As Variant, target As Variant)
           Dim res As Variant
           Dim i As Long
 
-20        res = ArrayCreate(UBound(columnData, 1), 1, False)
-30        For i = 1 To UBound(columnData, 1)
+20        res = ArrayCreate(ArrayRowsCount(columnData), 1, False)
+30        For i = 1 To ArrayRowsCount(columnData)
 40            If columnData(i, 1) = target Then
 50                res(i, 1) = True
 60            End If
@@ -646,7 +648,7 @@ Public Function ArrayEqual(columnData As Variant, target As Variant)
 80        ArrayEqual = res
 90        Exit Function
 ArrayEqual_Error:
-100       ArrayEqual = "#ArrayIsEqualOrGreaterThan:line(" & CStr(Erl) & ")" & Err.Description & "!"
+100       ArrayEqual = "#ArrayEqual:line(" & CStr(Erl) & ")" & Err.Description & "!"
 
 End Function
 
@@ -719,8 +721,8 @@ Public Function ArrayIsGreaterThan(columnData As Variant, target As Variant)
           Dim res As Variant
           Dim i As Long
 
-20        res = ArrayCreate(UBound(columnData, 1), 1, False)
-30        For i = 1 To UBound(columnData, 1)
+20        res = ArrayCreate(ArrayRowsCount(columnData), 1, False)
+30        For i = 1 To ArrayRowsCount(columnData)
 40            If IsNumeric(columnData(i, 1)) And Not IsEmpty(columnData(i, 1)) Then
 50                If columnData(i, 1) > target Then
 60                    res(i, 1) = True
@@ -853,9 +855,9 @@ Public Function ArrayDimension(data As Variant)
 
 10        On Error GoTo ArrayDimension_Error
           Dim res As Variant
-20        If isErrorString(ArrayDimension_1(data)) Then
+20        If IsErrorString(ArrayDimension_1(data)) Then
 30            ArrayDimension = 0
-40        ElseIf isErrorString(ArrayDimension_2(data)) Then
+40        ElseIf IsErrorString(ArrayDimension_2(data)) Then
 50            ArrayDimension = 1
 60        Else
 70            ArrayDimension = 2
@@ -914,12 +916,12 @@ Public Function ArrayRemoveRowAt(data As Variant, rowNum As Long)
 10        On Error GoTo ArrayRemoveRowAt_Error
           Dim res As Variant
 
-20        If rowNum = 1 And UBound(data, 1) = 1 Then
+20        If rowNum = 1 And ArrayRowsCount(data) = 1 Then
 30            res = ArrayCreate(0, 0)
 40        ElseIf rowNum = 1 Then
 50            res = SubArray(data, 2, 1)
-60        ElseIf rowNum = UBound(data, 1) Then
-70            res = SubArray(data, 1, 1, UBound(data, 1) - 1)
+60        ElseIf rowNum = ArrayRowsCount(data) Then
+70            res = SubArray(data, 1, 1, ArrayRowsCount(data) - 1)
 80        Else
 90            res = ArrayStack(SubArray(data, 1, 1, rowNum - 1), SubArray(data, rowNum + 1, 1))
 100       End If
@@ -935,11 +937,11 @@ Public Function ArrayRemoveColumnAt(data As Variant, columnNum As Long)
 
 10        On Error GoTo ArrayRemoveColumnAt_Error
           Dim res As Variant
-20        If columnNum = 1 And UBound(data, 2) = 1 Then
+20        If columnNum = 1 And ArrayColumnsCount(data) = 1 Then
 30            res = ArrayCreate(0, 0)
 40        ElseIf columnNum = 1 Then
 50            res = SubArray(data, 1, 2)
-60        ElseIf columnNum = UBound(data, 2) Then
+60        ElseIf columnNum = ArrayColumnsCount(data) Then
 70            res = SubArray(data, 1, 1, , UBound(data, 2) - 1)
 80        Else
 90            res = ArrayRange(SubArray(data, 1, 1, , columnNum - 1), SubArray(data, 1, columnNum + 1))
@@ -964,11 +966,11 @@ Public Function ArrayChooseTrue(data As Variant, chooser As Variant)
 30        If rowsCount = 0 Then
 40            res = ArrayCreate(0, 0)
 50        Else
-60            res = ArrayCreate(rowsCount, UBound(data, 2))
+60            res = ArrayCreate(rowsCount, ArrayColumnsCount(data))
 70            currentRow = 1
-80            For i = 1 To UBound(data, 1)
+80            For i = 1 To ArrayRowsCount(data)
 90                If chooser(i, 1) = True Then
-100                   For j = 1 To UBound(data, 2)
+100                   For j = 1 To ArrayColumnsCount(data)
 110                       res(currentRow, j) = data(i, j)
 120                   Next j
 130                   currentRow = currentRow + 1
@@ -990,7 +992,7 @@ Public Function ArrayCount_New(sourceArray As Variant, targetColumnData As Varia
           Dim i As Long
           Dim targetRowCount As Long
 
-20        targetRowCount = UBound(targetColumnData, 1)
+20        targetRowCount = ArrayRowsCount(targetColumnData)
 30        res = ArrayCreate(targetRowCount, 1, 0)
 40        For Each item In sourceArray
 50            For i = 1 To targetRowCount
@@ -1045,16 +1047,16 @@ Count_Error:
 100       Count = "#Count:line(" & CStr(Erl) & ")" & Err.Description & "!"
 End Function
 
-Public Function ArrayTranspose(data)
+Public Function ArrayTranspose(data As Variant)
 
 10        On Error GoTo ArrayTranspose_Error
           Dim res As Variant
           Dim i, j As Long
           Dim rowCount As Long
           Dim columnCount As Long
-20        rowCount = UBound(data, 1)
-30        columnCount = UBound(data, 2)
-40        ReDim res(1 To columnCount, 1 To rowCount)
+20        rowCount = ArrayRowsCount(data)
+30        columnCount = ArrayColumnsCount(data)
+40        res = ArrayCreate(columnCount, rowCount)
 50        For i = 1 To rowCount
 60            For j = 1 To columnCount
 70                res(j, i) = data(i, j)
@@ -1089,8 +1091,8 @@ Public Function ArrayFindFirstPosition(sourceArray As Variant, targetData As Var
 20        po.rowNum = 0
 30        po.columnNum = 0
 40        If byRowOrColumn = ByRow Then
-50            For i = 1 To UBound(sourceArray, 1)
-60                For j = 1 To UBound(sourceArray, 2)
+50            For i = 1 To ArrayRowsCount(sourceArray)
+60                For j = 1 To ArrayColumnsCount(sourceArray)
 70                    If sourceArray(i, j) = targetData Then
 80                        po.rowNum = i
 90                        po.columnNum = j
@@ -1099,8 +1101,8 @@ Public Function ArrayFindFirstPosition(sourceArray As Variant, targetData As Var
 120               Next j
 130           Next i
 140       Else
-150            For i = 1 To UBound(sourceArray, 2)
-160               For j = 1 To UBound(sourceArray, 1)
+150            For i = 1 To ArrayColumnsCount(sourceArray)
+160               For j = 1 To ArrayRowsCount(sourceArray)
 170                   If sourceArray(j, i) = targetData Then
 180                       po.rowNum = j
 190                       po.columnNum = i
@@ -1178,10 +1180,10 @@ Public Function ArrayColumnTakeByNum(data As Variant, columnToTake As Long, IfIn
           
 20        If IfIncludeTitle = True Then
 30            rowStart = 1
-40            height = UBound(data, 1)
+40            height = ArrayRowsCount(data)
 50        Else
 60            rowStart = 2
-70            height = UBound(data, 1) - 1
+70            height = ArrayRowsCount(data) - 1
 80        End If
           
 90        ArrayColumnTakeByNum = SubArray(data, rowStart, columnToTake, height, 1)
@@ -1244,13 +1246,13 @@ Public Function ArrayRange(sourceData As Variant, targetData As Variant)
           Dim sourceRowCount  As Long
           Dim targetRowCount As Long
           
-20        sourceRowCount = UBound(sourceData, 1)
-30        targetRowCount = UBound(targetData, 1)
+20        sourceRowCount = ArrayRowsCount(sourceData)
+30        targetRowCount = ArrayRowsCount(targetData)
 40        If sourceRowCount >= targetRowCount Then
 50            resSourceData = sourceData
-60            resTargetData = ArrayReshape(targetData, sourceRowCount, UBound(targetData, 2))
+60            resTargetData = ArrayReshape(targetData, sourceRowCount, ArrayColumnsCount(targetData))
 70        Else
-80            resSourceData = ArrayReshape(sourceData, targetRowCount, UBound(sourceData, 2))
+80            resSourceData = ArrayReshape(sourceData, targetRowCount, ArrayColumnsCount(sourceData))
 90            resTargetData = targetData
 100       End If
           
@@ -1259,9 +1261,9 @@ Public Function ArrayRange(sourceData As Variant, targetData As Variant)
           Dim columns2 As Long
           Dim i As Long
           Dim j As Long
-110       rowCountNew = UBound(resSourceData, 1)
-120       columns1 = UBound(resSourceData, 2)
-130       columns2 = UBound(resTargetData, 2)
+110       rowCountNew = ArrayRowsCount(resSourceData)
+120       columns1 = ArrayColumnsCount(resSourceData)
+130       columns2 = ArrayColumnsCount(resTargetData)
 140       res = ArrayCreate(rowCountNew, columns1 + columns2)
 150       For i = 1 To rowCountNew
 160           For j = 1 To columns1 + columns2
@@ -1314,8 +1316,8 @@ Public Function ArrayReshape(data As Variant, height As Long, width As Long)
           Dim oldRowCOunt, oldColumnCount As Long
           Dim i, j As Long
           Dim res As Variant
-20        oldRowCOunt = UBound(data, 1)
-30        oldColumnCount = UBound(data, 2)
+20        oldRowCOunt = ArrayRowsCount(data)
+30        oldColumnCount = ArrayColumnsCount(data)
           
 40        res = ArrayCreate(height, width)
           
@@ -1397,17 +1399,17 @@ ArrayNumberCreate_Error:
 250       ArrayNumberCreate = "#ArrayNumberCreate:line(" & CStr(Erl) & ")" & Err.Description & "!"
 End Function
 
-Public Function isErrorString(data As Variant)
+Public Function IsErrorString(data As Variant)
 10    On Error Resume Next
-20    isErrorString = False
+20    IsErrorString = False
 30    If TypeName(data) = "String" Then
 40        If InStr(data, "#") = 1 And InStr(data, "!") = Len(data) Then
-50            isErrorString = True
+50            IsErrorString = True
 60        End If
 70    End If
 End Function
 
-Public Function isEmptyOrEmptyString(data As Variant)
+Public Function IsEmptyOrEmptyString(data As Variant)
 10        On Error GoTo IsEmptyOrEmptyString_Error
           Dim res As Variant
 20        res = False
@@ -1419,45 +1421,47 @@ Public Function isEmptyOrEmptyString(data As Variant)
 80            End If
 90        End If
           
-100       isEmptyOrEmptyString = res
+100       IsEmptyOrEmptyString = res
 110       Exit Function
 IsEmptyOrEmptyString_Error:
-120       isEmptyOrEmptyString = "#IsEmptyOrEmptyString:line(" & CStr(Erl) & ")" & Err.Description & "!"
+120       IsEmptyOrEmptyString = "#IsEmptyOrEmptyString:line(" & CStr(Erl) & ")" & Err.Description & "!"
 
 End Function
 
-Public Function isEmptyOrErrorString(data As Variant)
+Public Function IsEmptyOrErrorString(data As Variant)
 10        On Error GoTo isEmptyOrErrorString_Error
           Dim res As Variant
           
-20        If isEmptyOrEmptyString(data) Or isErrorString(data) Then
+20        If IsEmptyOrEmptyString(data) Or IsErrorString(data) Then
 30            res = True
 40        Else
 50            res = False
 60        End If
           
-70        isEmptyOrErrorString = res
+70        IsEmptyOrErrorString = res
 80        Exit Function
 isEmptyOrErrorString_Error:
-90        isEmptyOrErrorString = "#isEmptyOrErrorString:line(" & CStr(Erl) & ")" & Err.Description & "!"
+90        IsEmptyOrErrorString = "#isEmptyOrErrorString:line(" & CStr(Erl) & ")" & Err.Description & "!"
 
 End Function
 
 Public Function ShowData(data As Variant)
 
 10        On Error GoTo ShowData_Error
+          Dim res As Variant
           Dim wbk As Workbook
           Dim sh As Worksheet
           Dim num_row As Long
           Dim num_column As Long
 20        Set wbk = Workbooks.Add
 30        Set sh = wbk.Sheets(1)
-40        sh.Range(sh.Cells(1, 1), sh.Cells(UBound(data, 1), UBound(data, 2))) = data
+40        res = To2DArray(data)
+50        sh.Range(sh.Cells(1, 1), sh.Cells(ArrayRowsCount(res), ArrayColumnsCount(res))) = res
           
-50        wbk.Activate
-60        Exit Function
+60        wbk.Activate
+70        Exit Function
 ShowData_Error:
-70        ShowData = "#ShowData:line(" & CStr(Erl) & ")" & Err.Description & "!"
+80        ShowData = "#ShowData:line(" & CStr(Erl) & ")" & Err.Description & "!"
 End Function
 
 Public Function GetNumberOfLastRow(ByRef sh As Worksheet)
@@ -1535,7 +1539,7 @@ Public Function wbkReopen(wbkPath As String) As Workbook
           Dim tmpWbk As Workbook
           Dim wbkName As String
           
-20        wbkName = getName(wbkPath)
+20        wbkName = GetName(wbkPath)
           
 30        Set tmpWbk = Workbooks(wbkName)
           
@@ -1553,31 +1557,31 @@ Public Function wbkReopen(wbkPath As String) As Workbook
 130           Set wbkReopen = tmpWbk
 140       End If
 End Function
-Public Function getFolder(pathText As String) As String
+Public Function GetFolder(pathText As String) As String
 10    On Error Resume Next
           Dim fileName As String
-20        fileName = getName(pathText)
-30        getFolder = Left(pathText, Len(pathText) - Len(fileName) - 1)
+20        fileName = GetName(pathText)
+30        GetFolder = Left(pathText, Len(pathText) - Len(fileName) - 1)
 End Function
-Public Function getShortName(name As String) As String
+Public Function GetShortName(name As String) As String
 10    On Error Resume Next
           Dim tmpList As Variant
 20        tmpList = Split(name, ".")
-30        getShortName = tmpList(LBound(tmpList))
+30        GetShortName = tmpList(LBound(tmpList))
 End Function
-Public Function getSuffix(name As String) As String
+Public Function GetSuffix(name As String) As String
 10    On Error Resume Next
           Dim tmpList As Variant
 20        tmpList = Split(name, ".")
-30        getSuffix = tmpList(UBound(tmpList))
+30        GetSuffix = tmpList(UBound(tmpList))
 End Function
-Public Function getName(pathTxt) As String
+Public Function GetName(pathTxt) As String
 10    On Error Resume Next
           Dim tmpList As Variant
 20        tmpList = Split(pathTxt, "\")
-30        getName = tmpList(UBound(tmpList))
+30        GetName = tmpList(UBound(tmpList))
 End Function
-Public Function getFileListInFolderStep1(folderPath As String)
+Public Function GetFileListInFolderStep1(folderPath As String)
 10        On Error GoTo getFileListInFolderStep1_Error
           Dim res As Variant
           Dim fso As New FileSystemObject
@@ -1587,7 +1591,7 @@ Public Function getFileListInFolderStep1(folderPath As String)
           Dim MyFolders As Folders
           Dim Folder As Folder
           Dim currentRow As Long
-20        Set fldr = fso.getFolder(folderPath)
+20        Set fldr = fso.GetFolder(folderPath)
 30        Set MyFiles = fldr.Files
 40        Set MyFolders = fldr.SubFolders
 50        currentRow = 0
@@ -1600,14 +1604,14 @@ Public Function getFileListInFolderStep1(folderPath As String)
 120       Else
 130           res = ArrayCreate(0, 0)
 140       End If
-150       getFileListInFolderStep1 = res
+150       GetFileListInFolderStep1 = res
 160       Exit Function
 getFileListInFolderStep1_Error:
-170       getFileListInFolderStep1 = "#getFileListInFolderStep1:line(" & CStr(Erl) & ")" & Err.Description & "!"
+170       GetFileListInFolderStep1 = "#getFileListInFolderStep1:line(" & CStr(Erl) & ")" & Err.Description & "!"
 
 End Function
 
-Public Function getFileListInFolderAndSub(folderPath As String)
+Public Function GetFileListInFolderAndSub(folderPath As String)
 10        On Error GoTo getFileListInFolderAndSub_Error
           Dim res As Variant
           Dim fso As New FileSystemObject
@@ -1617,7 +1621,7 @@ Public Function getFileListInFolderAndSub(folderPath As String)
           Dim MyFolders As Folders
           Dim Folder As Folder
           Dim currentRow As Long
-20        Set fldr = fso.getFolder(folderPath)
+20        Set fldr = fso.GetFolder(folderPath)
 30        Set MyFiles = fldr.Files
 40        Set MyFolders = fldr.SubFolders
 50        currentRow = 0
@@ -1632,19 +1636,19 @@ Public Function getFileListInFolderAndSub(folderPath As String)
 140       End If
 150       If MyFolders.Count > 0 Then
 160           For Each Folder In MyFolders
-170              res = ArrayStack(res, getFileListInFolderAndSub(Folder.Path))
+170              res = ArrayStack(res, GetFileListInFolderAndSub(Folder.Path))
 180           Next Folder
 190       End If
           
 
-200       getFileListInFolderAndSub = res
+200       GetFileListInFolderAndSub = res
 210       Exit Function
 getFileListInFolderAndSub_Error:
-220       getFileListInFolderAndSub = "#getFileListInFolderAndSub:line(" & CStr(Erl) & ")" & Err.Description & "!"
+220       GetFileListInFolderAndSub = "#getFileListInFolderAndSub:line(" & CStr(Erl) & ")" & Err.Description & "!"
 
 End Function
 
-Public Function getFolderListInFolderStep1(folderPath As String)
+Public Function GetFolderListInFolderStep1(folderPath As String)
 10        On Error GoTo getFolderListInFolderStep1_Error
           Dim res As Variant
           Dim fso As New FileSystemObject
@@ -1654,7 +1658,7 @@ Public Function getFolderListInFolderStep1(folderPath As String)
           Dim MyFolders As Folders
           Dim Folder As Folder
           Dim currentRow As Long
-20        Set fldr = fso.getFolder(folderPath)
+20        Set fldr = fso.GetFolder(folderPath)
 30        Set MyFiles = fldr.Files
 40        Set MyFolders = fldr.SubFolders
 50        currentRow = 0
@@ -1668,14 +1672,14 @@ Public Function getFolderListInFolderStep1(folderPath As String)
 130           res = ArrayCreate(0, 0)
 140       End If
           
-150       getFolderListInFolderStep1 = res
+150       GetFolderListInFolderStep1 = res
 160       Exit Function
 getFolderListInFolderStep1_Error:
-170       getFolderListInFolderStep1 = "#getFolderListInFolderStep1:line(" & CStr(Erl) & ")" & Err.Description & "!"
+170       GetFolderListInFolderStep1 = "#getFolderListInFolderStep1:line(" & CStr(Erl) & ")" & Err.Description & "!"
 
 End Function
 
-Public Function getFolderListInFolderAndSub(folderPath As String)
+Public Function GetFolderListInFolderAndSub(folderPath As String)
 10        On Error GoTo getFolderListInFolderAndSub_Error
           Dim res As Variant
           Dim fso As New FileSystemObject
@@ -1685,7 +1689,7 @@ Public Function getFolderListInFolderAndSub(folderPath As String)
           Dim MyFolders As Folders
           Dim Folder As Folder
           Dim currentRow As Long
-20        Set fldr = fso.getFolder(folderPath)
+20        Set fldr = fso.GetFolder(folderPath)
 30        Set MyFiles = fldr.Files
 40        Set MyFolders = fldr.SubFolders
 50        currentRow = 0
@@ -1696,17 +1700,17 @@ Public Function getFolderListInFolderAndSub(folderPath As String)
 100               currentRow = currentRow + 1
 110           Next
 120           For Each Folder In MyFolders
-130               res = ArrayStack(res, getFolderListInFolderAndSub(Folder.Path))
+130               res = ArrayStack(res, GetFolderListInFolderAndSub(Folder.Path))
 140           Next
 150       Else
 160           res = ArrayCreate(0, 0)
 170       End If
           
 
-180       getFolderListInFolderAndSub = res
+180       GetFolderListInFolderAndSub = res
 190       Exit Function
 getFolderListInFolderAndSub_Error:
-200       getFolderListInFolderAndSub = "#getFolderListInFolderAndSub:line(" & CStr(Erl) & ")" & Err.Description & "!"
+200       GetFolderListInFolderAndSub = "#getFolderListInFolderAndSub:line(" & CStr(Erl) & ")" & Err.Description & "!"
 
 End Function
 
